@@ -13,6 +13,7 @@ RSpec.describe Day03 do
       other_part_number = Day03::PartNumber.new(1, 1, 1)
       expect(part_number).to eq other_part_number
     end
+
     describe "#is_adjacent_to?" do
       it "is true if the other position is in the same row and the columns are adjacent" do
         # .123...
