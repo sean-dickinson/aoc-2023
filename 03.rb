@@ -1,6 +1,22 @@
 require "debug"
 module Day03
-  PartNumber = Data.define(:value) do
+  class PartNumber
+    attr_reader :value, :row, :column
+
+    def initialize(value, row, column)
+      @value = value
+      @row = row
+      @column = column
+    end
+
+    def ==(other)
+      value == other.value
+    end
+
+    def is_adjacent_to?(other_row, other_column)
+      is_adjacent_to_row?(other_row) && column_range.include?(other_column)
+    end
+
     def to_s
       value.to_s
     end
@@ -8,33 +24,15 @@ module Day03
     def length
       value.to_s.length
     end
-  end
-
-  class PartNumberWithPosition
-    attr_reader :part_number
-
-    def initialize(part_number, row, column)
-      @part_number = part_number
-      @row = row
-      @column = column
-    end
-
-    def value
-      @part_number.value
-    end
-
-    def is_adjacent_to?(other_row, other_column)
-      is_adjacent_to_row?(other_row) && column_range.include?(other_column)
-    end
 
     private
 
     def column_range
-      (@column - 1)..(@column + part_number.length)
+      (column - 1)..(column + length)
     end
 
     def is_adjacent_to_row?(other_row)
-      @row == other_row || @row == other_row - 1 || @row == other_row + 1
+      row == other_row || row == other_row - 1 || row == other_row + 1
     end
   end
 
@@ -45,17 +43,14 @@ module Day03
   end
 
   class Schematic
-    attr_reader :gears
+    attr_reader :part_numbers, :gears
+
     def initialize(rows)
       @part_numbers = []
       @gears = []
       @rows = rows
       parse_part_numbers
       parse_gears
-    end
-
-    def part_numbers
-      @part_numbers.map(&:part_number)
     end
 
     private
@@ -92,7 +87,7 @@ module Day03
     def add_part_number(raw_part_number, row_index, column_index)
       neighbors = get_neighbors_of(raw_part_number, row_index, column_index)
       return if neighbors.empty?
-      part_number = PartNumberWithPosition.new(PartNumber.new(raw_part_number.to_i), row_index, column_index)
+      part_number = PartNumber.new(raw_part_number.to_i, row_index, column_index)
       @part_numbers << part_number
     end
 
