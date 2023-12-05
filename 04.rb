@@ -36,13 +36,14 @@ module Day04
     end
 
     def matches
-      (@winning_numbers & @played_numbers).size
+      @matches ||= (@winning_numbers & @played_numbers).size
     end
   end
 
   class ScratchOffGame
     def initialize(cards:)
       @cards = create_hash_from_cards(cards)
+      @cards_won_by_card = {}
     end
 
     def cards
@@ -75,7 +76,7 @@ module Day04
 
     def get_cards_won_from_card(card)
       return [] if card.matches == 0
-      card.matches.times.map do |n|
+      @cards_won_by_card[card.card_number] ||= card.matches.times.map do |n|
         next_card_number = card.card_number + n + 1
         card_won = get_card_by_number(next_card_number)
         [card_won, *get_cards_won_from_card(card_won)]
