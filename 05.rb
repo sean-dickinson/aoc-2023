@@ -50,6 +50,10 @@ module Day05
       source_offset = value - source.begin
       destination.begin + source_offset
     end
+
+    def invert
+      self.class.new(source: destination, destination: source)
+    end
   end
 
   class CategoryMapping
@@ -94,6 +98,14 @@ module Day05
       end
       value
     end
+
+    def invert
+      self.class.new(
+        source_category: destination_category,
+        destination_category: source_category,
+        maps: maps.map(&:invert)
+      )
+    end
   end
 
   class Almanac
@@ -121,6 +133,7 @@ module Day05
     def initialize(seeds:, category_maps:)
       @seeds = seeds
       @category_maps = category_maps
+      @inverted_maps = @category_maps.map(&:invert).reverse
     end
 
     def lowest_location
@@ -128,13 +141,36 @@ module Day05
     end
 
     def lowest_location_as_range
-      # TODO: only check the part of the range that is in the first map?
+      potential_location_range.each do |location|
+        maybe_seed = inverted_convert(location)
+        return location if in_any_seed_range?(maybe_seed)
+      end
     end
 
     private
 
+    # @param location [Integer]
+    def inverted_convert(location)
+      @inverted_maps.inject(location) { |value, map| map.convert(value) }
+    end
+
+    def potential_location_range
+      lowest_beginning = min_location_range
+      0...lowest_beginning
+    end
+
+    # Find the beginning of the lowest location range
+    def min_location_range
+      inverted_location_maps = @inverted_maps.first.maps
+      inverted_location_maps.map { |map| map.source.begin }.reject(&:zero?).min
+    end
+
     def seed_ranges
       @seed_ranges ||= @seeds.each_slice(2).map { |start, length| (start...(start + length)) }
+    end
+
+    def in_any_seed_range?(value)
+      seed_ranges.any? { |range| range.include?(value) }
     end
 
     def mapped_seeds
@@ -152,8 +188,8 @@ module Day05
     end
 
     def part_two(input)
-      almanac = Almanac.from(input, true)
-      almanac.lowest_location
+      almanac = Almanac.from(input)
+      almanac.lowest_location_as_range
     end
   end
 end
