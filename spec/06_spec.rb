@@ -18,9 +18,14 @@ RSpec.describe Day06 do
 
   describe Day06::Race do
     describe "#ways_to_win" do
-      it "returns the number of ways to beat the record" do
+      it "returns the number of ways to beat the record for odd times" do
         race = Day06::Race.new(time_allowed: 7, record_distance: 9)
         expect(race.ways_to_win).to eq 4
+      end
+
+      it "returns the number of ways to beat the record for even times" do
+        race = Day06::Race.new(time_allowed: 30, record_distance: 200)
+        expect(race.ways_to_win).to eq 9
       end
     end
   end
@@ -34,9 +39,8 @@ RSpec.describe Day06 do
 
   context "part 2" do
     it "returns the correct answer for the example input" do
-      pending
       input = File.readlines("spec/test_inputs/06.txt", chomp: true)
-      expect(Day06.part_two(input)).to eq 0 # TODO: replace with correct answer
+      expect(Day06.part_two(input)).to eq 71503
     end
   end
 end

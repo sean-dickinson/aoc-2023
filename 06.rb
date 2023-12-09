@@ -22,6 +22,20 @@ module Day06
     end
   end
 
+  class BigRaceFactory
+    class << self
+      def from(input)
+        time = parse_line(input.first)
+        distance = parse_line(input.last)
+        Race.new(time_allowed: time, record_distance: distance)
+      end
+
+      def parse_line(line)
+        line.split(":").last.split.join("").to_i
+      end
+    end
+  end
+
   class Race
     def initialize(time_allowed:, record_distance:)
       @time_allowed = time_allowed
@@ -29,12 +43,28 @@ module Day06
     end
 
     def ways_to_win
-      (0..@time_allowed).count do |charge_time|
+      half_ways_to_win * 2 + adjustment
+    end
+
+    private
+
+    def half_ways_to_win
+      (1..half_time).count do |charge_time|
         boat.distance_for(charge_time: charge_time) > @record_distance
       end
     end
 
-    private
+    def half_time
+      (@time_allowed / 2).ceil
+    end
+
+    def adjustment
+      if @time_allowed.even?
+        -1
+      else
+        0
+      end
+    end
 
     def boat
       @boat ||= Boat.new(total_time: @time_allowed)
@@ -64,7 +94,8 @@ module Day06
     end
 
     def part_two(input)
-      raise NotImplementedError
+      race = BigRaceFactory.from(input)
+      race.ways_to_win
     end
   end
 end
