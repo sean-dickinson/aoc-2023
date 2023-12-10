@@ -119,19 +119,12 @@ module Day07
     protected
 
     def hand_class_for_cards
-      case number_of_jokers
-      when 5
+      return super if number_of_jokers.zero?
+
+      if number_of_jokers > 3
         FiveOfAKind
-      when 4
-        FiveOfAKind
-      when 3
-        when_three_jokers
-      when 2
-        when_two_jokers
-      when 1
-        when_one_joker
       else
-        super
+        joker_lookup.fetch(card_tally_with_jokers_removed, OnePair)
       end
     end
 
@@ -141,37 +134,36 @@ module Day07
       @cards.count { |card| card.is_a?(Joker) }
     end
 
-    def when_three_jokers
-      if highest_non_joker_card_count == 2
-        FiveOfAKind
-      else
-        FourOfAKind
-      end
+    def joker_lookup
+      {
+        **single_joker_lookup,
+        **two_joker_lookup,
+        **three_joker_lookup
+      }
     end
 
-    def when_two_jokers
-      if highest_non_joker_card_count == 3
-        FiveOfAKind
-      elsif highest_non_joker_card_count == 2
-        FourOfAKind
-      else
-        ThreeOfAKind
-      end
+    def single_joker_lookup
+      {
+        [4] => FiveOfAKind,
+        [1, 3] => FourOfAKind,
+        [2, 2] => FullHouse,
+        [1, 1, 2] => ThreeOfAKind
+      }
     end
 
-    def when_one_joker
-      case card_tally_with_jokers_removed
-      when [4]
-        FiveOfAKind
-      when [1, 3]
-        FourOfAKind
-      when [2, 2]
-        FullHouse
-      when [1, 1, 2]
-        ThreeOfAKind
-      else
-        OnePair
-      end
+    def two_joker_lookup
+      {
+        [3] => FiveOfAKind,
+        [1, 2] => FourOfAKind,
+        [1, 1, 1] => ThreeOfAKind
+      }
+    end
+
+    def three_joker_lookup
+      {
+        [2] => FiveOfAKind,
+        [1, 1] => FourOfAKind
+      }
     end
 
     def card_tally_with_jokers_removed
