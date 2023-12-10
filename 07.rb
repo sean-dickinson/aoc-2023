@@ -118,14 +118,13 @@ module Day07
   class JokerHandFactory < HandFactory
     protected
 
-    def hand_class_for_cards
-      return super if number_of_jokers.zero?
-
-      if number_of_jokers > 3
-        FiveOfAKind
-      else
-        joker_lookup.fetch(card_tally_with_jokers_removed, OnePair)
-      end
+    def counts_of_same_label
+      tallies = card_tally_with_jokers_removed.to_a
+      max = (tallies.pop || 0) + number_of_jokers
+      [
+        *tallies,
+        max
+      ]
     end
 
     private
@@ -134,44 +133,8 @@ module Day07
       @cards.count { |card| card.is_a?(Joker) }
     end
 
-    def joker_lookup
-      {
-        **single_joker_lookup,
-        **two_joker_lookup,
-        **three_joker_lookup
-      }
-    end
-
-    def single_joker_lookup
-      {
-        [4] => FiveOfAKind,
-        [1, 3] => FourOfAKind,
-        [2, 2] => FullHouse,
-        [1, 1, 2] => ThreeOfAKind
-      }
-    end
-
-    def two_joker_lookup
-      {
-        [3] => FiveOfAKind,
-        [1, 2] => FourOfAKind,
-        [1, 1, 1] => ThreeOfAKind
-      }
-    end
-
-    def three_joker_lookup
-      {
-        [2] => FiveOfAKind,
-        [1, 1] => FourOfAKind
-      }
-    end
-
     def card_tally_with_jokers_removed
       card_tally.reject { |card| card.is_a?(Joker) }.values.sort
-    end
-
-    def highest_non_joker_card_count
-      card_tally_with_jokers_removed.max
     end
   end
 
