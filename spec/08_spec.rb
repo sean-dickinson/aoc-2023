@@ -1,0 +1,104 @@
+require "./08"
+RSpec.describe Day08 do
+  describe Day08::Node do
+    context "initialization" do
+      it "has an address" do
+        node = Day08::Node.new("AAA")
+        expect(node.address).to eq "AAA"
+      end
+
+      it "left and right are nil by default" do
+        node = Day08::Node.new("AAA")
+        expect(node.left).to eq nil
+        expect(node.right).to eq nil
+      end
+
+      it "can have a left and right defined" do
+        node = Day08::Node.new("AAA")
+        node.left = "BBB"
+        node.right = "CCC"
+        expect(node.left).to eq "BBB"
+        expect(node.right).to eq "CCC"
+      end
+
+      it "can be created from a string" do
+        node = Day08::Node.from_string("AAA = (BBB, CCC)")
+        expect(node.address).to eq "AAA"
+        expect(node.left).to eq "BBB"
+        expect(node.right).to eq "CCC"
+      end
+    end
+
+    context "equality" do
+      it "is equal to another node with the same address" do
+        node1 = Day08::Node.new("AAA")
+        node2 = Day08::Node.new("AAA")
+        expect(node1).to eq node2
+      end
+
+      it "is not equal to another node with a different address" do
+        node1 = Day08::Node.new("AAA")
+        node2 = Day08::Node.new("BBB")
+        expect(node1).not_to eq node2
+      end
+    end
+  end
+
+  describe "Day08::Map" do
+    it "has instructions" do
+      map = Day08::Map.new("RL")
+      expect(map.instructions).to eq "RL"
+    end
+
+    it "has a node mapping" do
+      map = Day08::Map.new("RL", nodes: [Day08::Node.new("AAA")])
+      expect(map.node_mapping).to eq({"AAA" => Day08::Node.new("AAA")})
+    end
+
+    it "can be created from an array of strings" do
+      input = ["LLR",
+        "",
+        "AAA = (BBB, BBB)",
+        "BBB = (AAA, ZZZ)",
+        "ZZZ = (ZZZ, ZZZ)"]
+      map = Day08::Map.from_array(input)
+      expect(map.instructions).to eq "LLR"
+      expect(map.node_mapping).to eq({
+        "AAA" => Day08::Node.new("AAA", "BBB", "BBB"),
+        "BBB" => Day08::Node.new("BBB", "AAA", "ZZZ"),
+        "ZZZ" => Day08::Node.new("ZZZ", "ZZZ", "ZZZ")
+      })
+    end
+
+    describe "#walk" do
+      it "returns the number of steps from start to end" do
+        input = ["RL",
+          "",
+          "AAA = (BBB, CCC)",
+          "BBB = (DDD, EEE)",
+          "CCC = (ZZZ, GGG)",
+          "DDD = (DDD, DDD)",
+          "EEE = (EEE, EEE)",
+          "GGG = (GGG, GGG)",
+          "ZZZ = (ZZZ, ZZZ)"]
+        map = Day08::Map.from_array(input)
+        expect(map.walk).to eq 2
+      end
+    end
+  end
+
+  context "part 1" do
+    it "returns the correct answer for the example input" do
+      input = File.readlines("spec/test_inputs/08.txt", chomp: true)
+      expect(Day08.part_one(input)).to eq 6
+    end
+  end
+
+  context "part 2" do
+    it "returns the correct answer for the example input" do
+      pending
+      input = File.readlines("spec/test_inputs/08.txt", chomp: true)
+      expect(Day08.part_two(input)).to eq 0 # TODO: replace with correct answer
+    end
+  end
+end
