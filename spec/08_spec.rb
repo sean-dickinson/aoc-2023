@@ -27,6 +27,13 @@ RSpec.describe Day08 do
         expect(node.left).to eq "BBB"
         expect(node.right).to eq "CCC"
       end
+
+      it "can be created from a string even if it has numbers" do
+        node = Day08::Node.from_string("11A = (11B, XXX)")
+        expect(node.address).to eq "11A"
+        expect(node.left).to eq "11B"
+        expect(node.right).to eq "XXX"
+      end
     end
 
     context "equality" do
@@ -41,6 +48,25 @@ RSpec.describe Day08 do
         node2 = Day08::Node.new("BBB")
         expect(node1).not_to eq node2
       end
+    end
+
+    it "is a starting_node if it ends in A" do
+      node = Day08::Node.new("AAA")
+      expect(node.starting_node?).to eq true
+    end
+    it "is not a strating_node if it does not end in A" do
+      node = Day08::Node.new("BBB")
+      expect(node.starting_node?).to eq false
+    end
+
+    it "is an ending_node if it ends in Z" do
+      node = Day08::Node.new("ZZZ")
+      expect(node.ending_node?).to eq true
+    end
+
+    it "is not an ending_node if it does not end in Z" do
+      node = Day08::Node.new("BBB")
+      expect(node.ending_node?).to eq false
     end
   end
 
@@ -85,6 +111,25 @@ RSpec.describe Day08 do
         expect(map.walk).to eq 2
       end
     end
+
+    describe "#ghost_walk" do
+      it "returns the number of steps from all starts to all ends" do
+        input = [
+          "LR",
+          "",
+          "11A = (11B, XXX)",
+          "11B = (XXX, 11Z)",
+          "11Z = (11B, XXX)",
+          "22A = (22B, XXX)",
+          "22B = (22C, 22C)",
+          "22C = (22Z, 22Z)",
+          "22Z = (22B, 22B)",
+          "XXX = (XXX, XXX)"
+        ]
+        map = Day08::Map.from_array(input)
+        expect(map.ghost_walk).to eq 6
+      end
+    end
   end
 
   context "part 1" do
@@ -96,9 +141,19 @@ RSpec.describe Day08 do
 
   context "part 2" do
     it "returns the correct answer for the example input" do
-      pending
-      input = File.readlines("spec/test_inputs/08.txt", chomp: true)
-      expect(Day08.part_two(input)).to eq 0 # TODO: replace with correct answer
+      input = [
+        "LR",
+        "",
+        "11A = (11B, XXX)",
+        "11B = (XXX, 11Z)",
+        "11Z = (11B, XXX)",
+        "22A = (22B, XXX)",
+        "22B = (22C, 22C)",
+        "22C = (22Z, 22Z)",
+        "22Z = (22B, 22B)",
+        "XXX = (XXX, XXX)"
+      ]
+      expect(Day08.part_two(input)).to eq 6
     end
   end
 end

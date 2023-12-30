@@ -10,15 +10,17 @@ module Day08
       private
 
       def parse_children(children)
-        captures = children.match(/\((?<left>[A-Z]{3}), (?<right>[A-Z]{3})\)/)
+        captures = children.match(/\((?<left>[A-Z0-9]{3}), (?<right>[A-Z0-9]{3})\)/)
         [captures[:left], captures[:right]]
       end
     end
 
     include Comparable
+    # @return [String]
     attr_reader :address
     attr_accessor :left, :right
 
+    # @param address [String]
     def initialize(address, left = nil, right = nil)
       @address = address
       @left = left
@@ -27,6 +29,18 @@ module Day08
 
     def <=>(other)
       address <=> other.address
+    end
+
+    def starting_node?
+      address.end_with?("A")
+    end
+
+    def ending_node?
+      address.end_with?("Z")
+    end
+
+    def to_s
+      address
     end
   end
 
@@ -61,7 +75,28 @@ module Day08
       end
     end
 
+    def ghost_walk
+      results = []
+      starting_nodes.each do |starting_node|
+        results << walk_node(starting_node)
+      end
+      results.reduce(1, :lcm)
+    end
+
     private
+
+    def walk_node(node)
+      sendable_instructions.cycle.each_with_index do |direction, index|
+        node = node_mapping[node.send(direction)]
+        if node.ending_node?
+          return index + 1
+        end
+      end
+    end
+
+    def starting_nodes
+      node_mapping.values.select(&:starting_node?)
+    end
 
     def sendable_instructions
       instructions.chars.map { |direction| get_method_from_direction(direction) }
@@ -84,11 +119,17 @@ module Day08
 
   class << self
     def part_one(input)
-      Day08::Map.from_array(input).walk
+      map_from_input(input).walk
     end
 
     def part_two(input)
-      raise NotImplementedError
+      map_from_input(input).ghost_walk
+    end
+
+    private
+
+    def map_from_input(input)
+      @map ||= Day08::Map.from_array(input)
     end
   end
 end
